@@ -1,0 +1,18 @@
+{
+	"version": "1.0",
+	"manifest_version": 2,
+	"name": "Edit All Cats",
+	"description": "Update all categories when editing a Zwift event",
+	"permissions": [
+		"activeTab"
+	],
+	"browser_action": {
+		"default_icon": "logo.png"
+	},
+	"content_scripts": [
+		{
+			"matches": ["https://*.zwift.com/*/clubs/*/event/*/edit", "https://*.zwift.com/clubs/*/event/*/edit"],
+			"js": ["jquery.js", "edit-all-cats.js"]
+		}
+	]
+}
