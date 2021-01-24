@@ -6,9 +6,8 @@ $j(document).ready(function() {
 
 var sections = null;
 
-function updateCategories(data)
+function updateWorld(world)
 {
-	// update the world
 	console.log('Updating world...');
 	for (var ix = 0; ix < sections.length; ++ix) {
 		var section = sections[ix];
@@ -17,28 +16,41 @@ function updateCategories(data)
 
 		var evnt = document.createEvent('HTMLEvents');
 		evnt.initEvent('change', true, true);
-		select[0].value = data.world;
+		select[0].value = world;
 		select[0].dispatchEvent(evnt);
 	}
-	
-	// update the course
+}
+
+function updateCourse(course)
+{
 	console.log('Updating course...');
 	var routes = $j(sections).find("div.route-select-area");
-	var routeInputs = $j(routes).find("input");
+	
+	for (var ix = 0; ix < routes.length; ++ix)
+	{
+		var route = routes[ix];
 
-	for (var ix = 0; ix < routeInputs.length; ++ix) {
-		var input = routeInputs[ix];
+		var input = $j(route).find('input');
+		var span = $j(input).next('span');
 
-		var evnt = document.createEvent('HTMLEvents');
-		evnt.initEvent('change', true, true);
-		input.placeholder = data.course;
-		input.dispatchEvent(evnt);
+		var clickEvent = document.createEvent('HTMLEvents');
+		clickEvent.initEvent('click', true, true);
+		
+		// open the menu
+		span[0].dispatchEvent(clickEvent);
+
+		var div = $j(route).find(`div.ml-2 > div:contains(${course})`);
+		var parentDiv = $j(div).parent().parent().parent();
+
+		// click the item
+		parentDiv[0].dispatchEvent(clickEvent);
 	}
+}
 
-	// set up the correct duration type
+function updateDurationType(durationType)
+{
 	console.log('Updating duration type...');
-	var durationType = data.distance != null ? 0 : 2;
-
+	
 	for (var ix = 0; ix < sections.length; ++ix) {
 		var section = sections[ix];
 
@@ -48,32 +60,54 @@ function updateCategories(data)
 		input[0].checked = true;
 		input[0].dispatchEvent(evnt);
 	}
+}
 
-	// update distance / laps
+function updateDuration(durationType, distance, laps)
+{
 	console.log('Updating distance / laps...');
 	if (durationType == 0) {
 		// distance
 		for (var ix = 0; ix < sections.length; ++ix) {
 			var section = sections[ix];
-	
+
 			var input = $j(section).find("input[name=distanceInMeters]");
 			var evnt = document.createEvent('HTMLEvents');
 			evnt.initEvent('change', true, true);
-			input[0].value = data.distance;
+			input[0].value = distance;
 			input[0].dispatchEvent(evnt);
 		}
 	} else {
 		// laps
 		for (var ix = 0; ix < sections.length; ++ix) {
 			var section = sections[ix];
-	
+
 			var input = $j(section).find("input[name=laps]");
+			if (input.length == 0) {
+				if (laps != 1) {
+					window.alert(`Error, route only supports 1 lap, you have asked for ${laps} laps, if you need multiple laps for this course, use distance instead.`);
+					return;
+				}
+
+				continue;
+			}
+
 			var evnt = document.createEvent('HTMLEvents');
 			evnt.initEvent('change', true, true);
-			input[0].value = data.laps;
+			input[0].value = laps;
 			input[0].dispatchEvent(evnt);
 		}
 	}
+}
+
+function updateCategories(data)
+{
+	updateWorld(data.world);
+	
+	updateCourse(data.course);
+
+	updateDurationType(data.distance != null ? 0 : 2);
+
+	updateDuration(data.distance != null ? 0 : 2, data.distance, data.laps);
 
 	console.log('Finished updates');
 
@@ -96,9 +130,17 @@ function prepAllCats() {
 	// first section is Event Info, drop it
 	sections.shift();
 
+	// hide the description so there's less to scroll through
+	$j("label:contains(Event Description)").parent().attr('style', 'display:none');
+
+	// expand all the categories
+	for (var ix = 0; ix < buttons.length; ++ix) {
+		buttons[ix].click();
+	}
+
 	var eventTitle = $j("span[data-testid=event-title]").text();
 	var eventDateParts = $j("p[data-testid=event-date]").text().split('/');
-
+	
 	$j.ajax({
 		url: googleSheetsTsvUrl,
 		success: function(data, status, xhr) {
@@ -109,13 +151,6 @@ function prepAllCats() {
 		}
 	});
 
-	// hide the description so there's less to scroll through
-	$j("label:contains(Event Description)").parent().attr('style', 'display:none');
-
-	// expand all the categories
-	for (var ix = 0; ix < buttons.length; ++ix) {
-		buttons[ix].click();
-	}
 }
 
 function fetchDataFromTsv(tsv, title, dateParts)
@@ -142,7 +177,7 @@ function fetchDataFromTsv(tsv, title, dateParts)
 				distance: item.Distance == "" ? null : item.Distance
 			});
 
-			return;;
+			return;
 		}
 	}
 
