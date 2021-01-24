@@ -1,8 +1,8 @@
 {
 	"version": "1.0",
 	"manifest_version": 2,
-	"name": "Edit All Cats",
-	"description": "Update all categories when editing a Zwift event",
+	"name": "Zwift: Events from Google Sheets",
+	"description": "Allows automatic updating of events sourced from a published Google Sheets document",
 	"permissions": [
 		"activeTab"
 	],
