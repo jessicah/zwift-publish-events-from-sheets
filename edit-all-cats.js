@@ -153,6 +153,11 @@ function updateCategories(data)
 }
 
 function prepAllCats() {
+	if (window.location.href == "https://www.zwift.com/events") {
+		manageEvents();
+		return;
+	}
+	
 	var buttons = $j("button:contains(Edit category)");
 
 	if (buttons.length == 0) {
