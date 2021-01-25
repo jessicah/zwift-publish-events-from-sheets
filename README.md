@@ -20,10 +20,11 @@ To install:
 
 1. Download from https://github.com/jessicah/zwift-publish-events-from-sheets, click on the **Code** drop-down > **Download ZIP** and extract contents somewhere useful
 2. Open the file `edit-all-cats.js`, and replace the URL for `googleSheetsTsvUrl` with your published sheet URL
-3. Go to **chrome://extensions** in your address bar to open the Extensions page
-4. Click the **Load unpacked** button
-5. Navigate to the folder you downloaded and extracted, and **Select Folder**
-6. Enjoy!
+3. Open the file `manage-events.js`, and replace the `clubName` with your club's URL fragment
+4. Go to **chrome://extensions** in your address bar to open the Extensions page
+5. Click the **Load unpacked** button
+6. Navigate to the folder you downloaded and extracted, and **Select Folder**
+7. Enjoy!
 
 To use:
 
