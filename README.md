@@ -25,7 +25,15 @@ To install:
 5. Navigate to the folder you downloaded and extracted, and **Select Folder**
 6. Enjoy!
 
-Now when you edit an event, the extension will automatically fetch your published Google Sheet, update all categories, and hit Publish! for you.
+To use:
+
+1. Navigate to [Zwift Events](https://www.zwift.com/events/)
+2. Click on **Manage my events**
+
+Upon loading your club events, the extension will go through each event one-by-one, opening a tab and running the `update from sheets` script. Once
+you're done, close the tab, and the next event will be opened. This will repeat until finished.
+
+The `update from sheets` will automatically fetch your published Google Sheet, update all categories, and hit Publish! for you.
 
 If there is no match, you'll get an alert, and you should be able to edit the event as normal.
 
