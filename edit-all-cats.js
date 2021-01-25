@@ -62,9 +62,9 @@ function updateDurationType(durationType)
 	}
 }
 
-function updateDuration(durationType, distance, laps)
+function updateDuration(durationType, distance, laps, duration)
 {
-	console.log('Updating distance / laps...');
+	console.log('Updating distance / laps / duration... durationType [', durationType, '] distance [', distance, '] laps [', laps, '] duration [', duration, ']');
 	if (durationType == 0) {
 		// distance
 		for (var ix = 0; ix < sections.length; ++ix) {
@@ -75,6 +75,25 @@ function updateDuration(durationType, distance, laps)
 			evnt.initEvent('change', true, true);
 			input[0].value = distance;
 			input[0].dispatchEvent(evnt);
+		}
+	} else if (durationType == 1) {
+		// duration in minutes (convert to hours/minutes for input)
+		var durationHours = Math.floor(duration/60);
+		var durationMinutes = duration % 60;
+		for (var ix = 0; ix < sections.length; ++ix) {
+			var section = sections[ix];
+
+			var input = $j(section).find("input[name=durationHours]");
+			var evnt = document.createEvent('HTMLEvents');
+			evnt.initEvent('change', true, true);
+			input[0].value = durationHours;
+			input[0].dispatchEvent(evnt);
+
+			var input2 = $j(section).find("input[name=durationMinutes]");
+			var evnt2 = document.createEvent('HTMLEvents');
+			evnt2.initEvent('change', true, true);
+			input2[0].value = durationMinutes;
+			input2[0].dispatchEvent(evnt2);
 		}
 	} else {
 		// laps
@@ -99,15 +118,32 @@ function updateDuration(durationType, distance, laps)
 	}
 }
 
+function determineDurationType(data)
+{
+	if (data.distance != null) {
+		return 0;
+	} else if (data.laps != null) {
+		return 2;
+	} else if (data.duration != null) {
+		return 1;
+	} else {
+		window.alert('Unable to properly determine the Duration Type!!!');
+		console.log('Unable to properly determine the Duration Type!!!');
+		return 0;
+	}
+}
+
 function updateCategories(data)
 {
 	updateWorld(data.world);
 	
 	updateCourse(data.course);
 
-	updateDurationType(data.distance != null ? 0 : 2);
+	var durationType = determineDurationType(data);
 
-	updateDuration(data.distance != null ? 0 : 2, data.distance, data.laps);
+	updateDurationType(durationType);
+
+	updateDuration(durationType, data.distance, data.laps, data.duration);
 
 	console.log('Finished updates');
 
@@ -174,7 +210,8 @@ function fetchDataFromTsv(tsv, title, dateParts)
 				world: getWorld(item.World),
 				course: item.Course,
 				laps: item.Laps == "" ? null : item.Laps,
-				distance: item.Distance == "" ? null : item.Distance
+				distance: item.Distance == "" ? null : item.Distance,
+				duration: item.Duration == "" ? null : item.Duration
 			});
 
 			return;
@@ -215,7 +252,7 @@ function tsvJSON(tsv){
 		var obj = {};
 		var currentline=lines[i].split("\t");
    
-		for(var j=0;j<6;j++){
+		for(var j=0;j<7;j++){
 			obj[headers[j]] = currentline[j];
 		}
    
