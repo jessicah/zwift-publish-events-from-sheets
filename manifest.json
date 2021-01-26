@@ -4,15 +4,17 @@
 	"name": "Zwift: Events from Google Sheets",
 	"description": "Allows automatic updating of events sourced from a published Google Sheets document",
 	"permissions": [
-		"activeTab"
+		"activeTab", "storage"
 	],
 	"browser_action": {
-		"default_icon": "logo.png"
+		"default_title": "Zwift: Event Auto-Publishing",
+		"default_icon": "logo.png",
+		"default_popup": "options.html"
 	},
 	"content_scripts": [
 		{
 			"matches": ["https://*.zwift.com/*/clubs/*/event/*/edit", "https://*.zwift.com/clubs/*/event/*/edit", "https://www.zwift.com/events"],
-			"js": ["jquery.js", "edit-all-cats.js", "manage-events.js"]
+			"js": ["jquery.js", "edit-all-cats.js", "manage-events.js", "notify.js"]
 		}
 	]
 }

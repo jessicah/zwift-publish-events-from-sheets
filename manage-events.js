@@ -1,16 +1,42 @@
 
-var clubName = 'brt';
+var clubName = null;
 var eventIds = [];
 var newTab = null;
 
 function manageEvents()
+{
+	chrome.storage.sync.get(['clubName', 'sheetsUrl'], function(items) {
+		errors = [];
+		if (items.clubName == null || items.clubName == "") {
+			errors.push('The club name has not been set');
+		}
+		if (items.sheetsUrl == null || items.sheetsUrl == "") {
+			errors.push('A URL to a published Google Sheet document has not been set')
+		}
+
+		if (errors.length > 0) {
+			console.log('Aborting auto-publishing script');
+
+			errors.splice(0, 0, "Auto-publishing with Google Sheets has been disabled: use the extension options to configure");
+			showErrorBanner(errors);
+
+			return;
+		}
+	
+		clubName = items.clubName;
+
+		waitForEventsLink();
+	});	
+}
+
+function waitForEventsLink()
 {
 	// we're on the events page, wait until manage events has been click, load our events, then open each one in a new tab...
 	var manageLink = $j('a:contains(Back to all events)');
 
 	if (manageLink.length == 0) {
 		// page is still loading...
-		window.setTimeout(manageEvents, 1000);
+		window.setTimeout(waitForEventsLink, 1000);
 
 		return;
 	}

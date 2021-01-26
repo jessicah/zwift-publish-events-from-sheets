@@ -1,8 +1,36 @@
-var googleSheetsTsvUrl = 'INSERT GOOGLE SHEETS PUBLISHED URL HERE';
+var googleSheetsTsvUrl = null;
 
 $j(document).ready(function() {
-	window.setTimeout(prepAllCats, 1000);
+	window.setTimeout(initOptions, 1000);
 });
+
+function initOptions()
+{
+	if (window.location.href == "https://www.zwift.com/events") {
+		manageEvents();
+		return;
+	}
+	
+	chrome.storage.sync.get(['sheetsUrl'], function(items) {
+		errors = [];
+		if (items.sheetsUrl == null || items.sheetsUrl == "") {
+			errors.push('A URL to a published Google Sheet document has not been set')
+		}
+
+		if (errors.length > 0) {
+			console.log('Aborting auto-publishing script');
+
+			errors.splice(0, 0, "Auto-publishing with Google Sheets has been disabled: use the extension options to configure");
+			showErrorBanner(errors);
+
+			return;
+		}
+	
+		googleSheetsTsvUrl = items.sheetsUrl;
+
+		prepAllCats();
+	});
+}
 
 var sections = null;
 
@@ -153,11 +181,6 @@ function updateCategories(data)
 }
 
 function prepAllCats() {
-	if (window.location.href == "https://www.zwift.com/events") {
-		manageEvents();
-		return;
-	}
-	
 	var buttons = $j("button:contains(Edit category)");
 
 	if (buttons.length == 0) {
