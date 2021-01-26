@@ -279,7 +279,9 @@ function tsvJSON(tsv){
    
 		var obj = {};
 		var currentline=lines[i].split("\t");
-   
+
+		if (currentline.length <= 6) continue;
+		
 		for(var j=0;j<7;j++){
 			obj[headers[j]] = currentline[j];
 		}
