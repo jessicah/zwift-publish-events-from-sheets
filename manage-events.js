@@ -25,20 +25,39 @@ function manageEvents()
 	
 		clubName = items.clubName;
 
-		waitForEventsLink();
+		waitForManageLink();
 	});	
 }
 
-function waitForEventsLink()
+function waitForManageLink()
 {
-	// we're on the events page, wait until manage events has been click, load our events, then open each one in a new tab...
-	var manageLink = $j('a:contains(Back to all events)');
+	var manageLink = $j('a:contains(Manage my events)');
 
 	if (manageLink.length == 0) {
-		// page is still loading...
-		window.setTimeout(waitForEventsLink, 1000);
+		// page is still loading, or not logged in...
+		window.setTimeout(waitForManageLink, 1000);
 
 		return;
+	}
+
+	// have the link, now add a new link for auto-managing
+	var autoUpload = $j('<a style="color:#fc6719">Auto-upload Events</a>');
+	var container = $j('div.tab-navigation');
+	container[0].style.fontSize = '20px';
+	$j(container[0]).append(" &mdash; ");
+	$j(container[0]).append(autoUpload);
+
+	autoUpload[0].addEventListener('click', prepareOpenEventPages);
+}
+
+function prepareOpenEventPages()
+{
+	var evnt = document.createEvent('HTMLEvents');
+	evnt.initEvent('click', true, true);
+	var elem = $j('a:contains(Manage my events)');
+	
+	if (elem.length == 1) {
+		elem[0].dispatchEvent(evnt);
 	}
 
 	window.setTimeout(openEventPages, 1000);

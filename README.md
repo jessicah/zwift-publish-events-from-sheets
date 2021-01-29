@@ -49,9 +49,8 @@ Then hit that **Save Settings**.
 
 ## To use:
 
-
 1. Navigate to [Zwift Events](https://www.zwift.com/events/)
-2. Click on **Manage my events**
+2. Click on **Auto-upload Events**
 
 Upon loading your club events, the extension will go through each event one-by-one, opening a tab and running the `update from sheets`
 script. Once you're done, close the tab, and the next event will be opened. This will repeat until finished.
