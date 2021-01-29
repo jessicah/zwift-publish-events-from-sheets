@@ -217,11 +217,16 @@ function prepAllCats() {
 
 }
 
+function cleanDate(dateString)
+{
+	// converts a string like '2021/02/03' to '2021/2/3' for clean comparisons
+	var date = new Date(dateString);
+	return `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()}`
+}
+
 function fetchDataFromTsv(tsv, title, dateParts)
 {
 	var json = tsvJSON(tsv);
-
-	console.log(json);
 
 	var date = new Date(`${dateParts[2]}/${dateParts[0]}/${dateParts[1]}`);
 	var utcDate = `${date.getUTCFullYear()}/${date.getUTCMonth()+1}/${date.getUTCDate()}`;
@@ -231,7 +236,7 @@ function fetchDataFromTsv(tsv, title, dateParts)
 	for (var ix = 0; ix < json.length; ++ix) {
 		var item = json[ix];
 
-		if (item["Event Title"] == title && item["Event Date"] == utcDate) {
+		if (item["Event Title"] == title && cleanDate(item["Event Date"]) == utcDate) {
 			console.log('Found item', item);
 
 			updateCategories({
@@ -267,6 +272,18 @@ function getWorld(world) {
 	}
 }
 
+function isValidWorld(item)
+{
+	return ['Watopia', 'Richmond', 'London', 'New York',
+		'Innsbruck', 'Bologna', 'Yorkshire', 'Crit City',
+		'France', 'Paris'].includes(item);
+}
+
+function isValidDate(item)
+{
+	return /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(item);
+}
+
 function tsvJSON(tsv){
  
 	var lines=tsv.split("\n");
@@ -274,20 +291,38 @@ function tsvJSON(tsv){
 	var result = [];
    
 	var headers=lines[0].split("\t");
-   
+
+	console.log('Parsing TSV output from Google Sheets:', googleSheetsTsvUrl);
+	
 	for(var i=1;i<lines.length;i++){
    
 		var obj = {};
 		var currentline=lines[i].split("\t");
 
-		if (currentline.length <= 6) continue;
+		if (currentline.length <= 7) {
+			console.log(`Skipping line, not enough columns found: ${currentline.length}, expect 7`);
+			continue;
+		}
+
+		if (isValidWorld(currentline[2]) == false)
+		{
+			console.log(`Skipping line, valid world not found: ${currentline[2]}`);
+			continue;
+		}
+
+		if (isValidDate(currentline[1]) == false)
+		{
+			console.log(`Skipping line, valid date not found: '${currentline[1]}'`);
+			continue;
+		}
 		
 		for(var j=0;j<7;j++){
 			obj[headers[j]] = currentline[j];
+			console.log(`${headers[j]}:  ${currentline[j]}`);
 		}
    
 		result.push(obj);
-   
+		console.log('');
 	}
 	
 	return result;
