@@ -42,11 +42,18 @@ function updateWorld(world)
 		
 		var select = $j(section).find(`select[name=mapId]`);
 
+		if (select[0].disabled) {
+			showErrorBanner(['Event editing has been disabled.']);
+			return false;
+		}
+
 		var evnt = document.createEvent('HTMLEvents');
 		evnt.initEvent('change', true, true);
 		select[0].value = world;
 		select[0].dispatchEvent(evnt);
 	}
+
+	return true;
 }
 
 function updateCourse(course)
@@ -163,7 +170,10 @@ function determineDurationType(data)
 
 function updateCategories(data)
 {
-	updateWorld(data.world);
+	if (updateWorld(data.world) == false)
+	{
+		return;
+	}
 	
 	updateCourse(data.course);
 
