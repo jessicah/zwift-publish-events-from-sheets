@@ -28,11 +28,19 @@ The **Automatically republish when changes are made** should also be checked (se
 
 If the BRT icon is showing, click on it to open the options panel.
 
+![BRT Icon](assets/brt-icon-in-toolbar.png)
+
 If it is not:
    1. Click on the "jigaw piece" extension icon
    2. Click on "Zwift: Events from Google Sheets";
 
+![Jigsaw Piece Icon](assets/jigsaw-piece-icon.png)
+
+![Extension in Menu](assets/the-extension-in-menu.png)
+
 In the opened options panel, enter value of your published Google Sheet. If you'd also like to use the automation of all events, then also add your club name.
+
+![Extension Options Menu](assets/options-open.png)
 
 For example, BRT's club URL is [https://www.zwift.com/clubs/**brt**](https://www.zwift.com/clubs/brt), so you
 would enter **brt** for the club name.
