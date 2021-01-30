@@ -101,6 +101,12 @@
 	padding: 0 4px;
 }
 
+.view .selector select {
+    height: 36px;
+    width: 272px;
+    font-size: 16px;
+}
+
 .view .selector_title {
     font-size: 16px;
     text-align: left;
@@ -139,7 +145,17 @@
 		<div class="selector">
 			<input id='clubName'>
 		</div>
-		<div class="selector_title" id='status' style='display:none;margin-bottom: 1em'></div>
+		<div class="selector_title">
+            <label>Date Format String</label>
+		</div>
+		<div class="selector">
+			<select id='dateFormat'>
+                <option value='d/m/y' selected>day/month/year</option>
+                <option value='m/d/y'>month/day/year</option>
+                <option value='y/m/d'>year/month/day</option>
+            </select>
+        </div>
+        <div class="selector_title" id='status' style='display:none;margin-bottom: 1em'></div>
         <div class="save_button" id="save">
             <label>Save Settings</label>
         </div>

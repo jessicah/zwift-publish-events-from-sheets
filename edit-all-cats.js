@@ -1,4 +1,5 @@
 var googleSheetsTsvUrl = null;
+var dateFormat = 'd/m/y';
 
 $j(document).ready(function() {
 	window.setTimeout(initOptions, 1000);
@@ -11,7 +12,7 @@ function initOptions()
 		return;
 	}
 	
-	chrome.storage.sync.get(['sheetsUrl'], function(items) {
+	chrome.storage.sync.get(['sheetsUrl', 'dateFormat'], function(items) {
 		errors = [];
 		if (items.sheetsUrl == null || items.sheetsUrl == "") {
 			errors.push('A URL to a published Google Sheet document has not been set')
@@ -27,6 +28,7 @@ function initOptions()
 		}
 	
 		googleSheetsTsvUrl = items.sheetsUrl;
+		dateFormat = items.dateFormat;
 
 		prepAllCats();
 	});
@@ -218,13 +220,32 @@ function prepAllCats() {
 	$j.ajax({
 		url: googleSheetsTsvUrl,
 		success: function(data, status, xhr) {
-			fetchDataFromTsv(data, eventTitle, eventDateParts);
+			fetchDataFromTsv(data, eventTitle, parseDate(eventDateParts));
 		},
 		error: function (xhr, status, error) {
 			window.alert('Failed to retrieve data from Google Sheets');
 		}
 	});
 
+}
+
+function parseDate(dateParts)
+{
+	console.log(`Date format: ${dateFormat}`);
+
+	switch (dateFormat) {
+		case 'd/m/y':
+			var date = new Date(`${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`);
+			return `${date.getUTCFullYear()}/${date.getUTCMonth()+1}/${date.getUTCDate()}`;
+		case 'm/d/y':
+			var date = new Date(`${dateParts[2]}/${dateParts[0]}/${dateParts[1]}`);
+			return `${date.getUTCFullYear()}/${date.getUTCMonth()+1}/${date.getUTCDate()}`;
+		case 'y/m/d':
+				var date = new Date(`${dateParts[0]}/${dateParts[1]}/${dateParts[2]}`);
+				return `${date.getUTCFullYear()}/${date.getUTCMonth()+1}/${date.getUTCDate()}`;
+		default:
+			showErrorBanner(['Missing date format setting, unable to parse event date']);
+	}
 }
 
 function cleanDate(dateString)
@@ -234,12 +255,9 @@ function cleanDate(dateString)
 	return `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()}`
 }
 
-function fetchDataFromTsv(tsv, title, dateParts)
+function fetchDataFromTsv(tsv, title, utcDate)
 {
 	var json = tsvJSON(tsv);
-
-	var date = new Date(`${dateParts[2]}/${dateParts[0]}/${dateParts[1]}`);
-	var utcDate = `${date.getUTCFullYear()}/${date.getUTCMonth()+1}/${date.getUTCDate()}`;
 
 	console.log('Searching for item with title', title, 'on date', utcDate);
 
