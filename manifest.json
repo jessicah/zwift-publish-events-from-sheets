@@ -13,7 +13,14 @@
 	},
 	"content_scripts": [
 		{
-			"matches": ["https://*.zwift.com/*/clubs/*/event/*/edit", "https://*.zwift.com/clubs/*/event/*/edit", "https://www.zwift.com/events"],
+			"matches": [
+				"https://zwift.com/*/clubs/*/event/*/edit*",
+				"https://*.zwift.com/*/clubs/*/event/*/edit*",
+				"https://zwift.com/clubs/*/event/*/edit*",
+				"https://*.zwift.com/clubs/*/event/*/edit*",
+				"https://www.zwift.com/events*",
+				"https://zwift.com/events*"
+			],
 			"js": ["jquery.js", "edit-all-cats.js", "manage-events.js", "notify.js"]
 		}
 	]

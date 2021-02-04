@@ -7,7 +7,7 @@ $j(document).ready(function() {
 
 function initOptions()
 {
-	if (window.location.href == "https://www.zwift.com/events") {
+	if (window.location.pathname == '/events') {
 		manageEvents();
 		return;
 	}
