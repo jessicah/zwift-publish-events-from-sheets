@@ -1,39 +1,17 @@
 
-var clubName = null;
-var eventIds = [];
 var newTab = null;
+var eventIds = [];
 
 function manageEvents()
 {
-	chrome.storage.sync.get(['clubName', 'sheetsUrl'], function(items) {
-		errors = [];
-		if (items.clubName == null || items.clubName == "") {
-			errors.push('The club name has not been set');
-		}
-		if (items.sheetsUrl == null || items.sheetsUrl == "") {
-			errors.push('A URL to a published Google Sheet document has not been set')
-		}
-
-		if (errors.length > 0) {
-			console.log('Aborting auto-publishing script');
-
-			errors.splice(0, 0, "Auto-publishing with Google Sheets has been disabled: use the extension options to configure");
-			showErrorBanner(errors);
-
-			return;
-		}
-	
-		clubName = items.clubName;
-
-		waitForManageLink();
-	});	
+	waitForManageLink();
 }
 
 function waitForManageLink()
 {
 	var manageLink = $j('a:contains(Manage my events)');
 
-	if (manageLink.length == 0) {
+	if (manageLink.length == 0 || settings.loaded == false) {
 		// page is still loading, or not logged in...
 		window.setTimeout(waitForManageLink, 1000);
 
@@ -69,9 +47,23 @@ function openEventPages()
 
 	console.log(images);
 
+	eventIds = [];
+
 	for (var ix = 0; ix < images.length; ++ix) {
 		var eventId = images[ix].dataset.id;
 		console.log('Event id', eventId);
+
+		var header = $j(images[ix]).parent('div.listing-image').prev('div.listing-header');
+		var title = $j(header).children('div.header-title');
+
+		var titleText = title[0].innerText;
+
+		console.log(titleText);
+
+		if (hasTitle(titleText) == false) {
+			title[0].style.fontStyle = 'italic';
+			continue;
+		}
 
 		eventIds.push(eventId);
 	}
@@ -84,6 +76,22 @@ function openEventPages()
 	window.alert(`About to open ${eventIds.length} tabs, one at a time, to publish events where possible.`);
 
 	openTabs();
+}
+
+function hasTitle(title) {
+	if (settings.eventData == null) return;
+
+	for (var ix = 0; ix < settings.eventData.length; ++ix) {
+		var item = settings.eventData[ix];
+
+		if (item["Event Title"] == title) {
+			console.log('Found item', item);
+
+			return true;
+		}
+	}
+
+	return false;
 }
 
 function openTabs()
@@ -99,7 +107,7 @@ function openTabs()
 
 	var nextEvent = eventIds.shift();
 
-	newTab = window.open(`https://www.zwift.com/clubs/${clubName}/event/${nextEvent}/edit`, '_blank');
+	newTab = window.open(`https://www.zwift.com/clubs/${settings.clubName}/event/${nextEvent}/edit`, '_blank');
 
 	setTimeout(waitWindowClosed, 1000);
 }

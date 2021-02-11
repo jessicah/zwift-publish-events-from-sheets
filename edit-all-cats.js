@@ -1,5 +1,5 @@
-var googleSheetsTsvUrl = null;
-var dateFormat = 'd/m/y';
+
+var sections = null;
 
 $j(document).ready(function() {
 	window.setTimeout(initOptions, 1000);
@@ -11,30 +11,51 @@ function initOptions()
 		manageEvents();
 		return;
 	}
-	
-	chrome.storage.sync.get(['sheetsUrl', 'dateFormat'], function(items) {
-		errors = [];
-		if (items.sheetsUrl == null || items.sheetsUrl == "") {
-			errors.push('A URL to a published Google Sheet document has not been set')
-		}
 
-		if (errors.length > 0) {
-			console.log('Aborting auto-publishing script');
-
-			errors.splice(0, 0, "Auto-publishing with Google Sheets has been disabled: use the extension options to configure");
-			showErrorBanner(errors);
-
-			return;
-		}
-	
-		googleSheetsTsvUrl = items.sheetsUrl;
-		dateFormat = items.dateFormat;
-
-		prepAllCats();
-	});
+	prepAllCats();
 }
 
-var sections = null;
+function prepAllCats() {
+	var buttons = $j("button:contains(Edit category)");
+
+	if (buttons.length == 0 || settings.loaded == false) {
+		// page is still loading...
+		window.setTimeout(prepAllCats, 1000);
+
+		return;
+	}
+
+	sections = $j("section.club-form-section").toArray();
+	// first section is Event Info, drop it
+	sections.shift();
+
+	// hide the description so there's less to scroll through
+	$j("label:contains(Event Description)").parent().attr('style', 'display:none');
+
+	var eventTitle = $j("span[data-testid=event-title]").text();
+	var eventDateParts = $j("p[data-testid=event-date]").text().split('/');
+
+	var item = findEvent(eventTitle, parseDate(eventDateParts)); //fetchDataFromTsv(eventTitle, parseDate(eventDateParts));
+
+	if (item == null) {
+		window.alert(`Unable to locate an event with title '${eventTitle}' on date ${parseDate(eventDateParts)}`);
+
+		return;
+	}
+
+	// expand all the categories
+	for (var ix = 0; ix < buttons.length; ++ix) {
+		buttons[ix].click();
+	}
+
+	updateCategories({
+		world: getWorld(item.World),
+		course: item.Course,
+		laps: item.Laps == "" ? null : item.Laps,
+		distance: item.Distance == "" ? null : item.Distance,
+		duration: item.Duration == "" ? null : item.Duration
+	});
+}
 
 function updateWorld(world)
 {
@@ -192,48 +213,11 @@ function updateCategories(data)
 	publishButton.click();
 }
 
-function prepAllCats() {
-	var buttons = $j("button:contains(Edit category)");
-
-	if (buttons.length == 0) {
-		// page is still loading...
-		window.setTimeout(prepAllCats, 1000);
-
-		return;
-	}
-
-	sections = $j("section.club-form-section").toArray();
-	// first section is Event Info, drop it
-	sections.shift();
-
-	// hide the description so there's less to scroll through
-	$j("label:contains(Event Description)").parent().attr('style', 'display:none');
-
-	// expand all the categories
-	for (var ix = 0; ix < buttons.length; ++ix) {
-		buttons[ix].click();
-	}
-
-	var eventTitle = $j("span[data-testid=event-title]").text();
-	var eventDateParts = $j("p[data-testid=event-date]").text().split('/');
-	
-	$j.ajax({
-		url: googleSheetsTsvUrl,
-		success: function(data, status, xhr) {
-			fetchDataFromTsv(data, eventTitle, parseDate(eventDateParts));
-		},
-		error: function (xhr, status, error) {
-			window.alert('Failed to retrieve data from Google Sheets');
-		}
-	});
-
-}
-
 function parseDate(dateParts)
 {
-	console.log(`Date format: ${dateFormat}`);
+	console.log(`Date format: ${settings.dateFormat}`);
 
-	switch (dateFormat) {
+	switch (settings.dateFormat) {
 		case 'd/m/y':
 			var date = new Date(`${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`);
 			return `${date.getUTCFullYear()}/${date.getUTCMonth()+1}/${date.getUTCDate()}`;
@@ -255,31 +239,19 @@ function cleanDate(dateString)
 	return `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()}`
 }
 
-function fetchDataFromTsv(tsv, title, utcDate)
+function findEvent(title, utcDate)
 {
-	var json = tsvJSON(tsv);
-
-	console.log('Searching for item with title', title, 'on date', utcDate);
-
-	for (var ix = 0; ix < json.length; ++ix) {
-		var item = json[ix];
+	for (var ix = 0; ix < settings.eventData.length; ++ix) {
+		var item = settings.eventData[ix];
 
 		if (item["Event Title"] == title && cleanDate(item["Event Date"]) == utcDate) {
 			console.log('Found item', item);
 
-			updateCategories({
-				world: getWorld(item.World),
-				course: item.Course,
-				laps: item.Laps == "" ? null : item.Laps,
-				distance: item.Distance == "" ? null : item.Distance,
-				duration: item.Duration == "" ? null : item.Duration
-			});
-
-			return;
+			return item;
 		}
 	}
 
-	window.alert(`Unable to locate an event with title '${title}' on date ${utcDate}`);
+	return null;
 }
 
 function getWorld(world) {
@@ -311,47 +283,3 @@ function isValidDate(item)
 {
 	return /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(item);
 }
-
-function tsvJSON(tsv){
- 
-	var lines=tsv.split("\n");
-   
-	var result = [];
-   
-	var headers=lines[0].split("\t");
-
-	console.log('Parsing TSV output from Google Sheets:', googleSheetsTsvUrl);
-	
-	for(var i=1;i<lines.length;i++){
-   
-		var obj = {};
-		var currentline=lines[i].split("\t");
-
-		if (currentline.length <= 7) {
-			console.log(`Skipping line, not enough columns found: ${currentline.length}, expect 7`);
-			continue;
-		}
-
-		if (isValidWorld(currentline[2]) == false)
-		{
-			console.log(`Skipping line, valid world not found: ${currentline[2]}`);
-			continue;
-		}
-
-		if (isValidDate(currentline[1]) == false)
-		{
-			console.log(`Skipping line, valid date not found: '${currentline[1]}'`);
-			continue;
-		}
-		
-		for(var j=0;j<7;j++){
-			obj[headers[j]] = currentline[j];
-			console.log(`${headers[j]}:  ${currentline[j]}`);
-		}
-   
-		result.push(obj);
-		console.log('');
-	}
-	
-	return result;
-  }

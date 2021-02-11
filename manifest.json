@@ -21,7 +21,7 @@
 				"https://www.zwift.com/events*",
 				"https://zwift.com/events*"
 			],
-			"js": ["jquery.js", "edit-all-cats.js", "manage-events.js", "notify.js"]
+			"js": ["jquery.js", "setup.js", "edit-all-cats.js", "manage-events.js", "notify.js"]
 		}
 	]
 }
