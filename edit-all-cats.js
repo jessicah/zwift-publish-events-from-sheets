@@ -277,7 +277,7 @@ function parseTime(dateParts, timeParts)
 	var isPM = timeParts[1] == "PM" || timeParts[1] == "pm";
 	var offset = isPM ? 12 : 0;
 	
-	var timeString = `${+hourMinute[0] + offset}:${hourMinute[1]}`;
+	var timeString = `${Number(hourMinute[0]) + offset}:${hourMinute[1]}`;
 	
 	var date = null;
 
