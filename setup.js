@@ -4,7 +4,8 @@ var settings = {
 	sheetsUrl: null,
 	dateFormat: null,
 	eventData: [],
-	loaded: false
+	loadedSettings: false,
+	loadedTSV: false
 }
 
 var clubName = null;
@@ -14,45 +15,54 @@ var eventData = [];
 
 chrome.storage.sync.get(['clubName', 'sheetsUrl', 'dateFormat'], function(items) {
 	errors = [];
+	loadData = true;
+	bail = false;
+
 	if (items.sheetsUrl == null || items.sheetsUrl == "") {
-		errors.push('A URL to a published Google Sheet document has not been set');
+		errors.push('Warning: A URL to a published Google Sheet document has not been set');
+
+		loadData = false;
 	}
 
 	if (window.location.pathname == '/events' && (items.clubName == null || items.clubName == "")) {
-		errors.push('The club name has not been set');
+		errors.push('Error: The club name has not been set');
+		bail = true;
 	}
 
 	if (errors.length > 0) {
-		console.log('Aborting auto-publishing script');
-
-		errors.splice(0, 0, "Auto-publishing with Google Sheets has been disabled: use the extension options to configure");
+		errors.splice(0, 0, "Auto-publishing with TSV document has been disabled: use the extension options to configure");
 		showErrorBanner(errors);
 
-		return;
+		if (bail) return;
 	}
 
 	settings.clubName = items.clubName;
 	settings.sheetsUrl = items.sheetsUrl;
 	settings.dateFormat = items.dateFormat;
 
-	var fetchedData = null;
-	var promises = [];
-	
-	promises.push($j.ajax({
-		url: items.sheetsUrl,
-		success: function(data, status, xhr) {
-			fetchedData = data;
-		},
-		error: function (xhr, status, error) {
-			showErrorBanner(['Failed to retrieve data from Google Sheets']);
-		}
-	}));
+	if (loadData) {
+		var fetchedData = null;
+		var promises = [];
+		
+		promises.push($j.ajax({
+			url: items.sheetsUrl,
+			success: function(data, status, xhr) {
+				fetchedData = data;
+			},
+			error: function (xhr, status, error) {
+				showErrorBanner(['Failed to retrieve data from TSV document']);
+			}
+		}));
 
-	$j.when.apply(null, promises).done(function() {
-		if (fetchedData == null) return;
+		$j.when.apply(null, promises).done(function() {
+			if (fetchedData == null) return;
 
-		tsvToJson(fetchedData);
-	});
+			tsvToJson(fetchedData);
+		});
+	} else {
+		settings.loadedTSV = false;
+		settings.loadedSettings = true;
+	}
 });
 
 function tsvToJson(tsv){
@@ -91,5 +101,6 @@ function tsvToJson(tsv){
 		console.log('');
 	}
 
-	settings.loaded = true;
+	settings.loadedTSV = true;
+	settings.loadedSettings = true;
 }

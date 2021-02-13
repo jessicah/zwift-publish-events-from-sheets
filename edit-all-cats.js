@@ -18,7 +18,7 @@ function initOptions()
 function prepAllCats() {
 	var buttons = $j("button:contains(Edit category)");
 
-	if (buttons.length == 0 || settings.loaded == false) {
+	if (buttons.length == 0 || settings.loadedSettings == false) {
 		// page is still loading...
 		window.setTimeout(prepAllCats, 1000);
 
@@ -50,6 +50,8 @@ function prepAllCats() {
 	var changeButton = $j('<button type="button" class="btn btn-secondary text-uppercase">Create change request</button>');
 	publishButton.after(changeButton).after('&nbsp;');
 	changeButton.on('click', null, params, createChangeRequest);
+
+	if (settings.loadedTSV == false) return;
 
 	// look for the item for updating the categories
 	var item = findEvent(eventTitle, parseDate(eventDateParts));

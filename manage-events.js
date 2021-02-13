@@ -11,12 +11,14 @@ function waitForManageLink()
 {
 	var manageLink = $j('a:contains(Manage my events)');
 
-	if (manageLink.length == 0 || settings.loaded == false) {
+	if (manageLink.length == 0 || settings.loadedSettings == false) {
 		// page is still loading, or not logged in...
 		window.setTimeout(waitForManageLink, 1000);
 
 		return;
 	}
+
+	if (settings.loadedTSV == false) return;
 
 	// have the link, now add a new link for auto-managing
 	var autoUpload = $j('<a style="color:#fc6719">Auto-upload Events</a>');
