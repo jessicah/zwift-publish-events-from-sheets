@@ -30,12 +30,29 @@ function prepAllCats() {
 	sections.shift();
 
 	// hide the description so there's less to scroll through
-	$j("label:contains(Event Description)").parent().attr('style', 'display:none');
+	var description = $j("label:contains(Event Description)").parent();
+	description.attr('style', 'display:none');
 
 	var eventTitle = $j("span[data-testid=event-title]").text();
 	var eventDateParts = $j("p[data-testid=event-date]").text().split('/');
+	var eventTimeParts = $j("p[data-testid=event-time]").text().split(' ');
 
-	var item = findEvent(eventTitle, parseDate(eventDateParts)); //fetchDataFromTsv(eventTitle, parseDate(eventDateParts));
+	var params = {
+		title: eventTitle,
+		date: parseDate(eventDateParts),
+		time: parseTime(eventDateParts, eventTimeParts),
+		description: $j(description[0]).children('span').children('div').first()[0].innerText,
+		url: `https://www.zwift.com/events/view/${window.location.pathname.match('/([0-9]+)/')[1]}`
+	}
+
+	// add a button for creating a change request
+	var publishButton = $j('button:contains(Publish event)');
+	var changeButton = $j('<button type="button" class="btn btn-secondary text-uppercase">Create change request</button>');
+	publishButton.after(changeButton).after('&nbsp;');
+	changeButton.on('click', null, params, createChangeRequest);
+
+	// look for the item for updating the categories
+	var item = findEvent(eventTitle, parseDate(eventDateParts));
 
 	if (item == null) {
 		window.alert(`Unable to locate an event with title '${eventTitle}' on date ${parseDate(eventDateParts)}`);
@@ -54,6 +71,21 @@ function prepAllCats() {
 		laps: item.Laps == "" ? null : item.Laps,
 		distance: item.Distance == "" ? null : item.Distance,
 		duration: item.Duration == "" ? null : item.Duration
+	});
+}
+
+function createChangeRequest(evnt)
+{
+	console.log('create change request', evnt.data);
+	var items = evnt.data;
+	chrome.storage.local.set({
+		changeTitle: items.title,
+		changeDescription: items.description,
+		changeDate: items.date,
+		changeTime: items.time,
+		changeUrl: items.url
+	}, function() {
+		window.open("https://gozwift.kustomer.help/contact/event-change-request-HkA34mv5H", '_blank');
 	});
 }
 
@@ -217,19 +249,52 @@ function parseDate(dateParts)
 {
 	console.log(`Date format: ${settings.dateFormat}`);
 
+	var date = null;
+
 	switch (settings.dateFormat) {
 		case 'd/m/y':
-			var date = new Date(`${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`);
-			return `${date.getUTCFullYear()}/${date.getUTCMonth()+1}/${date.getUTCDate()}`;
+			date = new Date(`${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`);
+			break;
 		case 'm/d/y':
-			var date = new Date(`${dateParts[2]}/${dateParts[0]}/${dateParts[1]}`);
-			return `${date.getUTCFullYear()}/${date.getUTCMonth()+1}/${date.getUTCDate()}`;
+			date = new Date(`${dateParts[2]}/${dateParts[0]}/${dateParts[1]}`);
+			break;
 		case 'y/m/d':
-				var date = new Date(`${dateParts[0]}/${dateParts[1]}/${dateParts[2]}`);
-				return `${date.getUTCFullYear()}/${date.getUTCMonth()+1}/${date.getUTCDate()}`;
+			date = new Date(`${dateParts[0]}/${dateParts[1]}/${dateParts[2]}`);
+			break;
 		default:
 			showErrorBanner(['Missing date format setting, unable to parse event date']);
+			return null;
 	}
+
+	return `${date.getUTCFullYear()}/${date.getUTCMonth()+1}/${date.getUTCDate()}`;
+}
+
+function parseTime(dateParts, timeParts)
+{
+	var hourMinute = timeParts[0].split(':');
+	var isPM = timeParts[1] == "PM" || timeParts[1] == "pm";
+	var offset = isPM ? 12 : 0;
+	
+	var timeString = `${+hourMinute[0] + offset}:${hourMinute[1]}`;
+	
+	var date = null;
+
+	switch (settings.dateFormat) {
+		case 'd/m/y':
+			date = new Date(`${dateParts[2]}/${dateParts[1]}/${dateParts[0]} ${timeString}`);
+			break;
+		case 'm/d/y':
+			date = new Date(`${dateParts[2]}/${dateParts[0]}/${dateParts[1]} ${timeString}`);
+			break;
+		case 'y/m/d':
+			date = new Date(`${dateParts[0]}/${dateParts[1]}/${dateParts[2]} ${timeString}`);
+			break;
+		default:
+			showErrorBanner(['Missing date format setting, unable to parse event date']);
+			return null;
+	}
+	
+	return `${date.getUTCHours()}:${date.getUTCMinutes()} UTC`;
 }
 
 function cleanDate(dateString)

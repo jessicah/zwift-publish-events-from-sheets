@@ -19,9 +19,10 @@
 				"https://zwift.com/clubs/*/event/*/edit*",
 				"https://*.zwift.com/clubs/*/event/*/edit*",
 				"https://www.zwift.com/events*",
-				"https://zwift.com/events*"
+				"https://zwift.com/events*",
+				"https://gozwift.kustomer.help/contact/event-change-request-HkA34mv5H"
 			],
-			"js": ["jquery.js", "setup.js", "edit-all-cats.js", "manage-events.js", "notify.js"]
+			"js": ["jquery.js", "setup.js", "edit-all-cats.js", "manage-events.js", "change-request.js", "notify.js"]
 		}
 	]
 }
