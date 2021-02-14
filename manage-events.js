@@ -70,7 +70,7 @@ function openEventPages()
 		eventIds.push(eventId);
 	}
 
-	if (eventIds.length > 25) {
+	if (eventIds.length > 50) {
 		window.alert(`Script wants to open ${eventIds.length}, do you really have this many events? Aborting.`);
 		return;
 	}
