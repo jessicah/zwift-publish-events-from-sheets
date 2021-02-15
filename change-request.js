@@ -27,6 +27,7 @@ function applyFormFields(items) {
 			return;
 		}
 
+		$j('input#email')[0].value = settings.ownerEmail || '';
 		$j('input#name')[0].value = items.changeTitle.trim();
 		$j('input#eventUrl')[0].value = items.changeUrl.trim();
 		$j('input#eventStartDate')[0].value = items.changeDate.replaceAll('/', '-');

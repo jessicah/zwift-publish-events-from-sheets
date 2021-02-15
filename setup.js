@@ -13,7 +13,7 @@ var sheetsUrl = null;
 var dateFormat = null;
 var eventData = [];
 
-chrome.storage.sync.get(['clubName', 'sheetsUrl', 'dateFormat'], function(items) {
+chrome.storage.sync.get(['clubName', 'sheetsUrl', 'dateFormat', 'ownerEmail'], function(items) {
 	errors = [];
 	loadData = true;
 	bail = false;
@@ -39,6 +39,7 @@ chrome.storage.sync.get(['clubName', 'sheetsUrl', 'dateFormat'], function(items)
 	settings.clubName = items.clubName;
 	settings.sheetsUrl = items.sheetsUrl;
 	settings.dateFormat = items.dateFormat;
+	settings.ownerEmail = items.ownerEmail;
 
 	if (loadData) {
 		var fetchedData = null;
