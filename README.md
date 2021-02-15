@@ -6,6 +6,18 @@ An example of an events document: https://docs.google.com/spreadsheets/d/1jlLrcj
 
 Important: Event date is in UTC.
 
+Even if you don't have a link to a TSV document (you don't have to use Google Sheets), this extension can still be helpful:
+
+- A Create Change Request button has been added to pre-fill an Event Change Request form with the data for the event
+- Edits to the first category (indicated with orange border) will apply to all other categories
+  - Map
+  - Course
+  - Duration Type
+  - Duration for Laps or Distance (Time not yet supported)
+  - Everything else not yet supported
+
+If you need to make edits to the other categories, make your changes to the first category, then make your subsequent edits afterwards.
+
 ## To publish Google Sheet:
 
 1. **File**
@@ -57,8 +69,12 @@ script. Once you're done, close the tab, and the next event will be opened. This
 
 The `update from sheets` will automatically fetch your published Google Sheet, update all categories, and hit Publish! for you.
 
-If there is no match, you'll get an alert, and you should be able to edit the event as normal.
+Events that don't have a matching title will be skipped over, and their title changed to italics to reflect that they haven't been processed. You
+can then process these ones as per normal.
 
 You can have as many events in the sheet as you want, and shuffle them around as needed, e.g. delete the past month to update with new data. It will iterate over all non-empty rows to find a matching entry.
 
 Some courses, such as Bologna TT, if you want to do multiple laps, you'll need to enter a distance. This is a limitation with Zwift's event editing UI. In any case, you can always make further edits if needed.
+
+Additionally, a new button, **Create Change Request** has been added to the bottom of the event editing page, which will open the
+Event Change Request form in a new tab, and pre-fill it with the data from the event, which should help speed up that process too.
