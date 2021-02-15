@@ -50,7 +50,7 @@ If it is not:
 
 ![Extension in Menu](assets/the-extension-in-menu.png)
 
-In the opened options panel, enter value of your published Google Sheet. If you'd also like to use the automation of all events, then also add your club name.
+In the opened options panel, enter value of your published Google Sheet. If you'd also like to use the automation of all events, then also add your club name. Additionally, ensure the date format matches what is shown on the edit event pages, as this is locale sensitive.
 
 ![Extension Options Menu](assets/options-open.png)
 
