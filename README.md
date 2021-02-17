@@ -16,6 +16,9 @@ Even if you don't have a link to a TSV document (you don't have to use Google Sh
   - Duration for Laps or Distance (Time not yet supported)
   - Everything else not yet supported
 
+The TSV (Google Sheets) document also now supports providing a separate value per category with semicolon delimited values, e.g.
+`50; 40; 30; 20` in the distance column.
+
 If you need to make edits to the other categories, make your changes to the first category, then make your subsequent edits afterwards.
 
 ## To publish Google Sheet:
