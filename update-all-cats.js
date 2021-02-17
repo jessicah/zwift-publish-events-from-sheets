@@ -33,7 +33,7 @@ function prepAllCats() {
 	var description = $j("label:contains(Event Description)").parent();
 	description.attr('style', 'display:none');
 
-	var eventTitle = $j("span[data-testid=event-title]").text();
+	var eventTitle = $j("span[data-testid=event-title]").text().trim();
 	var eventDateParts = $j("p[data-testid=event-date]").text().split('/');
 	var eventTimeParts = $j("p[data-testid=event-time]").text().split(' ');
 
@@ -163,59 +163,55 @@ function updateDurationType(durationType)
 	}
 }
 
+function updateDurationValues(selector, value)
+{
+	var values = Array.from({length: settings.sections.length}, _ => value);
+	if (value.includes(';')) {
+		// we have separate values for each category
+		values = value.split(';').map(s => s.trim());
+
+		if (values.length != settings.sections.length) {
+			window.alert(`Expected ${settings.sections.length} values, but found ${values.length} for separate category values.`);
+			return;
+		}
+	}
+
+	for (var ix = 0; ix < settings.sections.length; ++ix) {
+		var section = settings.sections[ix];
+
+		var input = $j(section).find(selector);
+
+		// This is a special case for laps
+		if (input.length == 0) {
+			if (values[ix] != 1) {
+				window.alert(`Error, route only supports 1 lap, you have asked for ${values[ix]} laps, if you need multiple laps for this course, use distance instead.`);
+				return;
+			}
+
+			continue;
+		}
+
+		var evnt = document.createEvent('HTMLEvents');
+		evnt.initEvent('change', true, true);
+		input[0].value = values[ix];
+		input[0].dispatchEvent(evnt);
+	}
+}
+
 function updateDuration(durationType, distance, laps, duration)
 {
 	console.log('Updating distance / laps / duration... durationType [', durationType, '] distance [', distance, '] laps [', laps, '] duration [', duration, ']');
 	if (durationType == 0) {
-		// distance
-		for (var ix = 0; ix < settings.sections.length; ++ix) {
-			var section = settings.sections[ix];
-
-			var input = $j(section).find("input[name=distanceInMeters]");
-			var evnt = document.createEvent('HTMLEvents');
-			evnt.initEvent('change', true, true);
-			input[0].value = distance;
-			input[0].dispatchEvent(evnt);
-		}
+		updateDurationValues('input[name=distanceInMeters]', distance);
 	} else if (durationType == 1) {
 		// duration in minutes (convert to hours/minutes for input)
 		var durationHours = Math.floor(duration/60);
 		var durationMinutes = duration % 60;
-		for (var ix = 0; ix < settings.sections.length; ++ix) {
-			var section = settings.sections[ix];
-
-			var input = $j(section).find("input[name=durationHours]");
-			var evnt = document.createEvent('HTMLEvents');
-			evnt.initEvent('change', true, true);
-			input[0].value = durationHours;
-			input[0].dispatchEvent(evnt);
-
-			var input2 = $j(section).find("input[name=durationMinutes]");
-			var evnt2 = document.createEvent('HTMLEvents');
-			evnt2.initEvent('change', true, true);
-			input2[0].value = durationMinutes;
-			input2[0].dispatchEvent(evnt2);
-		}
+		// ensure we cast to string, as we perform string operations on the value
+		updateDurationValues('input[name=durationHours]', new String(durationHours));
+		updateDurationValues('input[name=durationMinutes]', new String(durationMinutes));
 	} else {
-		// laps
-		for (var ix = 0; ix < settings.sections.length; ++ix) {
-			var section = settings.sections[ix];
-
-			var input = $j(section).find("input[name=laps]");
-			if (input.length == 0) {
-				if (laps != 1) {
-					window.alert(`Error, route only supports 1 lap, you have asked for ${laps} laps, if you need multiple laps for this course, use distance instead.`);
-					return;
-				}
-
-				continue;
-			}
-
-			var evnt = document.createEvent('HTMLEvents');
-			evnt.initEvent('change', true, true);
-			input[0].value = laps;
-			input[0].dispatchEvent(evnt);
-		}
+		updateDurationValues('input[name=laps]', laps);
 	}
 }
 
@@ -253,7 +249,7 @@ function updateCategories(data)
 
 	var publishButton = $j("button.btn-primary:contains(Publish event)");
 
-	publishButton.click();
+	//publishButton.click();
 }
 
 function parseDate(dateParts)

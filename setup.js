@@ -95,7 +95,7 @@ function tsvToJson(tsv){
 		
 		for (var j = 0; j < 7; ++j) {
 			obj[headers[j]] = currentline[j];
-			console.log(`${headers[j]}:  ${currentline[j]}`);
+			console.log(`${headers[j]}: ${currentline[j]}`);
 		}
    
 		settings.eventData.push(obj);
