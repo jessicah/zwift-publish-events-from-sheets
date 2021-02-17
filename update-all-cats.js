@@ -37,10 +37,14 @@ function prepAllCats() {
 	var eventDateParts = $j("p[data-testid=event-date]").text().split('/');
 	var eventTimeParts = $j("p[data-testid=event-time]").text().split(' ');
 
+	var dateTime = parseDateTime(eventDateParts, eventTimeParts);
+	
+	console.log(dateTime);
+
 	var params = {
 		title: eventTitle,
-		date: parseDate(eventDateParts),
-		time: parseTime(eventDateParts, eventTimeParts),
+		date: getDate(dateTime),
+		time: getTime(dateTime),
 		description: $j(description[0]).children('span').children('div').first()[0].innerText,
 		url: `https://www.zwift.com/events/view/${window.location.pathname.match('/([0-9]+)/')[1]}`
 	}
@@ -54,7 +58,7 @@ function prepAllCats() {
 	if (settings.loadedTSV == false) return;
 
 	// look for the item for updating the categories
-	var item = findEvent(eventTitle, parseDate(eventDateParts));
+	var item = findEvent(eventTitle, getDate(dateTime));
 
 	if (item != null) {
 		// expand all the categories
@@ -70,7 +74,7 @@ function prepAllCats() {
 			duration: item.Duration == "" ? null : item.Duration
 		});
 	} else {
-		window.alert(`Unable to locate an event with title '${eventTitle}' on date ${parseDate(eventDateParts)}`);
+		window.alert(`Unable to locate an event with title '${eventTitle}' on date ${getDate(dateTime)}`);
 
 		// for events with leaders/sweepers, they don't load if we open too quickly
 		setInterval(function() {
@@ -252,31 +256,17 @@ function updateCategories(data)
 	//publishButton.click();
 }
 
-function parseDate(dateParts)
+function getDate(date)
 {
-	console.log(`Date format: ${settings.dateFormat}`);
-
-	var date = null;
-
-	switch (settings.dateFormat) {
-		case 'd/m/y':
-			date = new Date(`${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`);
-			break;
-		case 'm/d/y':
-			date = new Date(`${dateParts[2]}/${dateParts[0]}/${dateParts[1]}`);
-			break;
-		case 'y/m/d':
-			date = new Date(`${dateParts[0]}/${dateParts[1]}/${dateParts[2]}`);
-			break;
-		default:
-			showErrorBanner(['Missing date format setting, unable to parse event date']);
-			return null;
-	}
-
 	return `${date.getUTCFullYear()}/${date.getUTCMonth()+1}/${date.getUTCDate()}`;
 }
 
-function parseTime(dateParts, timeParts)
+function getTime(date)
+{
+	return `${date.getUTCHours()}:${date.getUTCMinutes()} UTC`;
+}
+
+function parseDateTime(dateParts, timeParts)
 {
 	var hourMinute = timeParts[0].split(':');
 	var isPM = timeParts[1] == "PM" || timeParts[1] == "pm";
@@ -284,24 +274,17 @@ function parseTime(dateParts, timeParts)
 	
 	var timeString = `${Number(hourMinute[0]) + offset}:${hourMinute[1]}`;
 	
-	var date = null;
-
 	switch (settings.dateFormat) {
 		case 'd/m/y':
-			date = new Date(`${dateParts[2]}/${dateParts[1]}/${dateParts[0]} ${timeString}`);
-			break;
+			return new Date(`${dateParts[2]}/${dateParts[1]}/${dateParts[0]} ${timeString}`);
 		case 'm/d/y':
-			date = new Date(`${dateParts[2]}/${dateParts[0]}/${dateParts[1]} ${timeString}`);
-			break;
+			return new Date(`${dateParts[2]}/${dateParts[0]}/${dateParts[1]} ${timeString}`);
 		case 'y/m/d':
-			date = new Date(`${dateParts[0]}/${dateParts[1]}/${dateParts[2]} ${timeString}`);
-			break;
+			return new Date(`${dateParts[0]}/${dateParts[1]}/${dateParts[2]} ${timeString}`);
 		default:
 			showErrorBanner(['Missing date format setting, unable to parse event date']);
 			return null;
 	}
-	
-	return `${date.getUTCHours()}:${date.getUTCMinutes()} UTC`;
 }
 
 function cleanDate(dateString)
