@@ -253,7 +253,7 @@ function updateCategories(data)
 
 	var publishButton = $j("button.btn-primary:contains(Publish event)");
 
-	//publishButton.click();
+	publishButton.click();
 }
 
 function getDate(date)
