@@ -1,3 +1,7 @@
+# **NOTICE**: No Longer Supported
+
+Zwift has changed their event editing UI, rendering this extension obsolete. And unfortunately, there is still no bulk upload functionality.
+
 # Zwift: Publish Events from Google Sheets
 
 This is a new variation on [Zwift: Edit Events Extension](https://github.com/jessicah/zwift-edit-events-extensions), that pulls data from a published Google Sheet document.
